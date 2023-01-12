@@ -1,7 +1,7 @@
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
-const port = 8000;
+const port = 7777;
 
 const server = http.createServer();
 
@@ -20,16 +20,32 @@ server.on("request", (req, res) => {
     );
     res.end();
   }
-  if (req.url === "/read-message") {
-    res.statusCode = 200;
+
+  if (req.url === "/read-message" && req.method === "GET") {
     res.setHeader("Content-Type", "text/html");
-    res.write(
-      `<html>
-      
-      </html>`
-    );
-    res.end();
+    const txtPath = path.join(__dirname, "message.txt");
+
+    fs.readFile(txtPath, (err, content) => {
+      if (err) {
+        if (err.code === "ENOENT") {
+        } else {
+          res.writeHead(500);
+          res.end(`Server Error ${err.code}`);
+        }
+      } else {
+        // res.writeHead(200, { "Content-Type": "text/plain" });
+        // res.write(content);
+        res.writeHead(200, { "Content-Type": "text/html" });
+        res.write(
+          `<html>
+          <h1>${content}</h1>
+          </html>`
+        );
+        res.end();
+      }
+    });
   }
+
   if (req.url === "/write-message" && req.method === "GET") {
     res.statusCode = 200;
     res.setHeader("Content-Type", "text/html");
